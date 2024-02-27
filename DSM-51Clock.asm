@@ -9,12 +9,10 @@ MM equ 77h
 HH equ 76h
 KBDS bit P3.5 	   
 
-KBST equ 72h	   
-
+KBST equ 72h
 org 0
-
-	ljmp start     
-
+	ljmp start
+    
 org 0Bh			   
 	setb F0 	   
 	mov TH0 ,#226
@@ -22,26 +20,19 @@ org 0Bh
 	reti
 
 org 80h
-
 start:
 	mov SS,#30
 	mov MM,#58
 	mov HH,#12
 	mov DPTR, #wzory              
 	lcall przelicz
-
-	;mov CZAS+6,#00111010B		  
-
+	;mov CZAS+6,#00111010B
 	mov R7, #00000001b            
-	mov R4, #4                  
-				                 
+	mov R4, #4
 	clr SEG7                     
-	mov R1,#CZAS                 
-
-
+	mov R1,#CZAS
 	mov R2,#192 				 
 	mov R3,#4
-
 	mov IE,#10000010b			 
 	mov TMOD,#01110000b;		 
 	mov TH0 ,#226				 
@@ -56,8 +47,7 @@ petla:
 ;	movc A,@A+DPTR                
 	setb SEG7                    
 	mov R0, #CSDB                
-	movx @R0,A                   
-
+	movx @R0,A
 	mov A, R7                    
 	mov R0, #CSDS               
 	movx @R0,A                   
@@ -68,23 +58,21 @@ petla:
 	mov CZAS+6,KBST
 
 noKey:
-
-
 	rl A                        
-	jnb ACC.7, noACC7             
-
+	jnb ACC.7, noACC7
 	mov A,KBST
 	jz bezObslugi
 	cjne A,KBST+1, bezObslugi
     cjne A,KBST+2, bezObslugi
     cjne A,KBST+3, keyService
     sjmp bezObslugi
+    
 keyService:
 	;4/16/32
 	cjne A,#4 ,ACCnie4
 	acall inkrementujSekundy
 	sjmp bezObslugi
-
+    
 ACCnie4:
 	cjne A,#16,ACCnie16
 	acall inkrementujMinuty
@@ -95,7 +83,6 @@ ACCnie16:
 	acall inkrementujGodziny
 
 bezObslugi:
-
 	mov A, #00000001b             
 	mov R1, #CZAS+0               
 	mov KBST+3,KBST+2
@@ -103,27 +90,23 @@ bezObslugi:
     mov KBST+1,KBST+0
 	mov KBST,#0
 	mov CZAS+6,#0
+    
 noACC7:
-	mov R7 , A                    
-
-
+	mov R7 , A
 	djnz R2, jeszczeNieSekunda
 	djnz R3, jeszczeNieSekunda
     cpl TEST   					  
     lcall inkrementujSekundy
-
 	mov R2, #192
 	MOV R3, #4
 
 jeszczeNieSekunda:
-
-;delay:
+;   delay:
 ;	djnz R6, delay               
 ;	djnz R5, delay
 ;	djnz R4, delay
 	mov R4, #4
-
-
+    
 	sjmp petla
 
 inkrementujSekundy:
@@ -131,11 +114,13 @@ inkrementujSekundy:
 	mov R4,SS
 	cjne R4,#60,jeszczeNie60
 	mov SS,#0
+    
 inkrementujMinuty:
 	inc MM
 	mov R4,MM
 	cjne R4,#60,jeszczeNie60
 	mov MM,#0
+    
 inkrementujGodziny:
 	inc HH
 	mov R4,HH
@@ -147,7 +132,6 @@ jeszczeNie60:
 	;ret
 
 przelicz:
-
 	mov A, SS
 	mov B, #10
 	div AB
@@ -157,7 +141,6 @@ przelicz:
 	mov A,B
 	movc A,@A+DPTR
 	mov CZAS+0,A
-
 	mov A, MM
 	mov B, #10
 	div AB
@@ -166,7 +149,6 @@ przelicz:
 	mov A,B
 	movc A,@A+DPTR
     mov CZAS+2,A
-
     mov A, HH
 	mov B, #10
 	div AB
@@ -175,7 +157,6 @@ przelicz:
 	mov A,B
 	movc A,@A+DPTR
 	mov CZAS+4,A
-
 	ret
 
 
